@@ -35,10 +35,10 @@ chmod +x setup_and_run.sh
    ```bash
    # Остановите старые контейнеры (если есть)
    docker-compose down
-   
+
    # Соберите и запустите контейнеры
    docker-compose up -d
-   
+
    # Подождите 10-15 секунд для запуска БД, затем примените миграции
    docker-compose exec web alembic upgrade head
    ```
@@ -206,7 +206,7 @@ curl -H "api_key: your-super-secret-api-key" \
 - `GET /api/v1/buildings/` - Получить все здания
 - `POST /api/v1/buildings/` - Создать новое здание
 
-### Виды деятельности  
+### Виды деятельности
 - `GET /api/v1/activities/` - Получить все виды деятельности
 - `POST /api/v1/activities/` - Создать новый вид деятельности
 
