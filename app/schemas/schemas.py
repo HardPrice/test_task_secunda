@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel, constr, field_validator
+from pydantic import BaseModel, constr, field_validator, ConfigDict
 from geopy.point import Point
 from geoalchemy2.shape import to_shape
 
@@ -28,8 +28,7 @@ class Phone(PhoneBase):
     id: int
     organization_id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class BuildingBase(BaseModel):
     address: str
@@ -58,8 +57,7 @@ class BuildingCreate(BuildingBase):
 class Building(BuildingBase):
     id: int
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @classmethod
     def model_validate(cls, obj, *args, **kwargs):
@@ -94,8 +92,7 @@ class Activity(ActivityBase):
     id: int
     children: List['Activity'] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class OrganizationBase(BaseModel):
     name: str
@@ -129,8 +126,7 @@ class Organization(OrganizationBase):
     activities: List[Activity]
     building: Building
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Обновляем forward references
 Activity.model_rebuild()

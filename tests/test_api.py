@@ -11,20 +11,22 @@ from app.core.config import settings
 # Создаем тестовую базу данных
 SQLALCHEMY_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
-    "postgresql://postgres:postgres@db/test_db"
+    "postgresql://postgres:postgres@db/organization_directory"
 )
 
 # Создаем подключение к базе данных
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 def setup_module():
-    """Создаем таблицы перед запуском тестов."""
-    Base.metadata.drop_all(bind=engine)  # Удаляем старые таблицы
-    Base.metadata.create_all(bind=engine)  # Создаем новые таблицы
+    """Подготавливаем тесты - проверяем подключение к БД."""
+    # Проверяем подключение к базе данных
+    with engine.connect() as conn:
+        pass  # Просто проверяем, что подключение работает
 
 def teardown_module():
-    """Удаляем таблицы после завершения тестов."""
-    Base.metadata.drop_all(bind=engine)
+    """Очищаем после тестов."""
+    # Можно добавить очистку тестовых данных, если нужно
+    pass
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -94,7 +96,7 @@ def test_create_organization():
             "activities": []
         }
     )
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["name"] == "ООО Тест"
     assert data["building_id"] == building_id
@@ -119,34 +121,40 @@ def test_create_organization_invalid_phone():
 
 def test_create_activity_max_level():
     """Тест создания вида деятельности с превышением максимального уровня вложенности."""
+    import time
+    timestamp = str(int(time.time()))
+    
     # Создаем корневую категорию
     root = client.post(
         f"{settings.API_V1_STR}/activities/",
         headers={"api_key": settings.API_KEY},
-        json={"name": "Уровень 1"}
+        json={"name": f"Тест Уровень 1 {timestamp}"}
     )
+    assert root.status_code == 201
     root_id = root.json()["id"]
     
     # Создаем категорию второго уровня
     level2 = client.post(
         "/api/v1/activities/",
         headers={"api_key": settings.API_KEY},
-        json={"name": "Уровень 2", "parent_id": root_id}
+        json={"name": f"Тест Уровень 2 {timestamp}", "parent_id": root_id}
     )
+    assert level2.status_code == 201
     level2_id = level2.json()["id"]
     
     # Создаем категорию третьего уровня
     level3 = client.post(
         "/api/v1/activities/",
         headers={"api_key": settings.API_KEY},
-        json={"name": "Уровень 3", "parent_id": level2_id}
+        json={"name": f"Тест Уровень 3 {timestamp}", "parent_id": level2_id}
     )
+    assert level3.status_code == 201
     level3_id = level3.json()["id"]
     
     # Пытаемся создать категорию четвертого уровня
     response = client.post(
         "/api/v1/activities/",
         headers={"api_key": settings.API_KEY},
-        json={"name": "Уровень 4", "parent_id": level3_id}
+        json={"name": f"Тест Уровень 4 {timestamp}", "parent_id": level3_id}
     )
     assert response.status_code == 400

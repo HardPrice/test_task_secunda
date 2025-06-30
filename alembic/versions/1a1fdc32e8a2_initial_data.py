@@ -10,7 +10,7 @@ from geoalchemy2 import Geography
 
 # revision identifiers, used by Alembic.
 revision = '1a1fdc32e8a2'
-down_revision = None
+down_revision = '000_create_tables'
 branch_labels = None
 depends_on = None
 
